@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Simulador de Caneca 3D - SUBLIMArt</title>
+  <title>Simulador de Caneca 3D</title>
 
-  <!-- Executado antes do render para eliminar o flash no cliente -->
+  <!-- Executado antes do render para eliminar o flash no modo cliente -->
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('view') === '1') {
@@ -37,11 +37,12 @@
       display: flex;
     }
 
-    /* Oculta o menu lateral e exibe o rodapé de marca no modo cliente */
+    /* Oculta o menu lateral e exibe os elementos de marca no modo cliente */
     html.client-mode #sidebar {
       display: none !important;
     }
 
+    html.client-mode #client-header,
     html.client-mode #client-footer {
       display: flex !important;
     }
@@ -143,28 +144,49 @@
       cursor: grabbing;
     }
 
+    /* --- TÍTULO DO TOPO (Modo Cliente) --- */
+    #client-header {
+      display: none;
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(26, 26, 26, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 30px;
+      padding: 8px 22px;
+      z-index: 100;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 1.5px;
+      color: #00adb5;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      text-align: center;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
     /* --- RODAPÉ DE MARCA DO CLIENTE --- */
     #client-footer {
       display: none;
       position: absolute;
-      bottom: 16px;
+      bottom: 15px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(26, 26, 26, 0.88);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 28px;
+      border-radius: 30px;
       padding: 10px 18px;
       z-index: 100;
       align-items: center;
-      justify-content: center;
-      gap: 14px;
+      gap: 15px;
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
       max-width: 95%;
-      width: auto;
       pointer-events: auto;
-      flex-wrap: wrap;
     }
 
     .brand-info {
@@ -174,11 +196,11 @@
     }
 
     .brand-logo {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
       object-fit: cover;
-      background-color: #252525;
+      background-color: #222;
       border: 1.5px solid #00adb5;
     }
 
@@ -189,7 +211,7 @@
 
     .brand-title {
       font-weight: bold;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       color: #ffffff;
       white-space: nowrap;
     }
@@ -204,21 +226,19 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
     }
 
     .btn-contact {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       padding: 8px 12px;
       border-radius: 20px;
       text-decoration: none;
       font-size: 0.75rem;
       font-weight: bold;
-      transition: transform 0.2s, background 0.2s;
+      transition: transform 0.2s, opacity 0.2s;
       white-space: nowrap;
     }
 
@@ -231,31 +251,33 @@
       color: #ffffff;
     }
 
-    .btn-wsp:hover {
-      background-color: #20ba5a;
-    }
-
     .btn-insta {
       background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
       color: #ffffff;
     }
 
-    /* Responsividade para telas de celulares */
+    /* Responsividade para Celulares */
     @media (max-width: 600px) {
       #client-footer {
-        padding: 8px 12px;
+        flex-direction: column;
+        border-radius: 20px;
+        padding: 10px;
         gap: 8px;
         bottom: 10px;
-        border-radius: 20px;
       }
-
-      .brand-subtitle {
-        display: none;
+      .brand-buttons {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
       }
-
       .btn-contact {
         padding: 6px 10px;
         font-size: 0.7rem;
+      }
+      #client-header {
+        font-size: 0.75rem;
+        padding: 6px 16px;
+        top: 10px;
       }
     }
   </style>
@@ -286,13 +308,18 @@
     </div>
   </div>
 
-  <!-- Container do 3D -->
+  <!-- Container do Canvas 3D -->
   <div id="canvas-container"></div>
 
-  <!-- RODAPÉ EXCLUSIVO DO CLIENTE -->
+  <!-- TÍTULO NO TOPO (Modo Cliente) -->
+  <div id="client-header">SIMULADOR DE CANECA 3D</div>
+
+  <!-- RODAPÉ DE MARCA E CONTATOS (Modo Cliente) -->
   <div id="client-footer">
     <div class="brand-info">
-      <img src="logo.png" alt="SUBLIMArt" class="brand-logo" id="store-logo">
+      <!-- Carrega o logo direto da raiz do seu repositório no GitHub -->
+      <img src="vetor-logo.png" alt="SUBLIMArt" class="brand-logo" id="store-logo">
+      
       <div class="brand-text">
         <span class="brand-title">SUBLIMArt Personalizados</span>
         <span class="brand-subtitle">Aprovação do Mockup 3D</span>
@@ -301,12 +328,12 @@
 
     <div class="brand-buttons">
       <!-- WhatsApp 1 -->
-      <a href="https://wa.me/5592992914867?text=Ol%C3%A1!%20Gostei%20do%20mockup%20da%20caneca%203D!" target="_blank" class="btn-contact btn-wsp">
-        🟢 <span>(92) 99291-4867</span>
+      <a href="https://wa.me/5592992914876?text=Ol%C3%A1!%20Gostei%20da%20amostra%20da%20caneca%203D!" target="_blank" class="btn-contact btn-wsp">
+        🟢 <span>(92) 99291-4876</span>
       </a>
 
       <!-- WhatsApp 2 -->
-      <a href="https://wa.me/5592993522287?text=Ol%C3%A1!%20Gostei%20do%20mockup%20da%20caneca%203D!" target="_blank" class="btn-contact btn-wsp">
+      <a href="https://wa.me/5592993522287?text=Ol%C3%A1!%20Gostei%20da%20amostra%20da%20caneca%203D!" target="_blank" class="btn-contact btn-wsp">
         🟢 <span>(92) 99352-2287</span>
       </a>
 
