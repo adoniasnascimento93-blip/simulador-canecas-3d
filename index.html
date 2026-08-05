@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Simulador de Caneca 3D</title>
+  <title>Simulador de Caneca 3D - SUBLIMArt</title>
 
-  <!-- Script executado antes do render para eliminar o "flash" do menu no cliente -->
+  <!-- Executado antes do render para eliminar o flash no cliente -->
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('view') === '1') {
@@ -30,16 +30,20 @@
       background-color: #121212;
       color: #ffffff;
       position: fixed;
-      touch-action: none; /* Impede a página de rolar ou dar zoom nativo no celular */
+      touch-action: none;
     }
 
     body {
       display: flex;
     }
 
-    /* Oculta o menu lateral imediatamente no modo cliente */
+    /* Oculta o menu lateral e exibe o rodapé de marca no modo cliente */
     html.client-mode #sidebar {
       display: none !important;
+    }
+
+    html.client-mode #client-footer {
+      display: flex !important;
     }
 
     #sidebar {
@@ -138,10 +142,127 @@
     #canvas-container:active {
       cursor: grabbing;
     }
+
+    /* --- RODAPÉ DE MARCA DO CLIENTE --- */
+    #client-footer {
+      display: none;
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(26, 26, 26, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      padding: 10px 18px;
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      max-width: 95%;
+      width: auto;
+      pointer-events: auto;
+      flex-wrap: wrap;
+    }
+
+    .brand-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      background-color: #252525;
+      border: 1.5px solid #00adb5;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-weight: bold;
+      font-size: 0.88rem;
+      color: #ffffff;
+      white-space: nowrap;
+    }
+
+    .brand-subtitle {
+      font-size: 0.7rem;
+      color: #00adb5;
+      white-space: nowrap;
+    }
+
+    .brand-buttons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-contact {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: bold;
+      transition: transform 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-contact:active {
+      transform: scale(0.95);
+    }
+
+    .btn-wsp {
+      background-color: #25D366;
+      color: #ffffff;
+    }
+
+    .btn-wsp:hover {
+      background-color: #20ba5a;
+    }
+
+    .btn-insta {
+      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+      color: #ffffff;
+    }
+
+    /* Responsividade para telas de celulares */
+    @media (max-width: 600px) {
+      #client-footer {
+        padding: 8px 12px;
+        gap: 8px;
+        bottom: 10px;
+        border-radius: 20px;
+      }
+
+      .brand-subtitle {
+        display: none;
+      }
+
+      .btn-contact {
+        padding: 6px 10px;
+        font-size: 0.7rem;
+      }
+    }
   </style>
 </head>
 <body>
 
+  <!-- Sidebar de Edição -->
   <div id="sidebar">
     <h1>Configurações do Mockup</h1>
     
@@ -165,7 +286,36 @@
     </div>
   </div>
 
+  <!-- Container do 3D -->
   <div id="canvas-container"></div>
+
+  <!-- RODAPÉ EXCLUSIVO DO CLIENTE -->
+  <div id="client-footer">
+    <div class="brand-info">
+      <img src="logo.png" alt="SUBLIMArt" class="brand-logo" id="store-logo">
+      <div class="brand-text">
+        <span class="brand-title">SUBLIMArt Personalizados</span>
+        <span class="brand-subtitle">Aprovação do Mockup 3D</span>
+      </div>
+    </div>
+
+    <div class="brand-buttons">
+      <!-- WhatsApp 1 -->
+      <a href="https://wa.me/5592992914867?text=Ol%C3%A1!%20Gostei%20do%20mockup%20da%20caneca%203D!" target="_blank" class="btn-contact btn-wsp">
+        🟢 <span>(92) 99291-4867</span>
+      </a>
+
+      <!-- WhatsApp 2 -->
+      <a href="https://wa.me/5592993522287?text=Ol%C3%A1!%20Gostei%20do%20mockup%20da%20caneca%203D!" target="_blank" class="btn-contact btn-wsp">
+        🟢 <span>(92) 99352-2287</span>
+      </a>
+
+      <!-- Instagram -->
+      <a href="https://instagram.com/sublimart_ofc1" target="_blank" class="btn-contact btn-insta">
+        📸 <span>@sublimart_ofc1</span>
+      </a>
+    </div>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -192,15 +342,13 @@
     controls.dampingFactor = 0.05;
     controls.minDistance = 2.0;
     controls.maxDistance = 8;
-    controls.target.set(0, 0, 0); // Mantém o ponto de rotação 100% no centro da caneca
-    controls.enablePan = false;   // Impede que a caneca saia do centro ao arrastar no celular
+    controls.target.set(0, 0, 0);
+    controls.enablePan = false;
 
-    // Ajusta o enquadramento perfeito da câmera conforme a proporção da tela (Mobile x Desktop)
     function updateResponsiveCamera() {
       const aspect = container.clientWidth / container.clientHeight;
       camera.aspect = aspect;
       
-      // Em telas na vertical (smartphones), aumenta o campo de visão para a caneca caber inteira
       if (aspect < 1) {
         camera.fov = 55;
       } else {
@@ -222,7 +370,7 @@
     backLight.position.set(-5, 3, -5);
     scene.add(backLight);
 
-    // 3. Canvas 2D Intermediário da Estampa em Alta Resolução (2K)
+    // 3. Canvas 2D Intermediário da Estampa em HD (2K)
     const textureCanvas = document.createElement('canvas');
     textureCanvas.width = 2048;
     textureCanvas.height = 900;
@@ -276,12 +424,11 @@
       metalness: 0.05
     });
 
-    // 5. Construção do Modelo da Caneca
+    // 5. Modelo 3D da Caneca
     const mugGroup = new THREE.Group();
     const radius = 1.15;
     const height = 2.6;
 
-    // A. Corpo Externo
     const outerGeo = new THREE.CylinderGeometry(radius, radius, height, 64, 1, true);
     outerGeo.computeVertexNormals();
 
@@ -289,20 +436,17 @@
     outerMesh.rotation.y = Math.PI / 2;
     mugGroup.add(outerMesh);
 
-    // B. Interior da Caneca
     const innerGeo = new THREE.CylinderGeometry(radius - 0.08, radius - 0.08, height - 0.08, 64, 1, false);
     innerGeo.translate(0, 0.04, 0);
     const innerMesh = new THREE.Mesh(innerGeo, ceramicMaterial);
     mugGroup.add(innerMesh);
 
-    // C. Borda Superior
     const rimGeo = new THREE.TorusGeometry(radius - 0.04, 0.04, 16, 64);
     rimGeo.rotateX(Math.PI / 2);
     rimGeo.translate(0, height / 2, 0);
     const rimMesh = new THREE.Mesh(rimGeo, ceramicMaterial);
     mugGroup.add(rimMesh);
 
-    // D. Alça Curvada
     const handleCurve = new THREE.CubicBezierCurve3(
       new THREE.Vector3(radius - 0.05, height * 0.35, 0),
       new THREE.Vector3(radius + 0.95, height * 0.45, 0),
@@ -317,7 +461,7 @@
 
     scene.add(mugGroup);
 
-    // 6. Carregamento da Arte/Cor via URL
+    // 6. Leitura dos Parâmetros da URL
     let currentImage = null;
 
     const paramColor = urlParams.get('color');
@@ -340,7 +484,7 @@
       updateTextureCanvas();
     }
 
-    // 7. Controles e Eventos de Edição
+    // 7. Eventos de Edição
     document.getElementById('upload-art').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (file) {
@@ -364,7 +508,7 @@
       updateTextureCanvas(currentImage, colorValue);
     });
 
-    // 8. Botão para Copiar o Link do Cliente
+    // 8. Botão de Compartilhamento em HD
     const btnShare = document.getElementById('btn-share');
 
     btnShare.addEventListener('click', async function() {
