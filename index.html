@@ -2,21 +2,49 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Simulador de Caneca 3D</title>
+
+  <!-- Script executado antes do render para eliminar o "flash" do menu no cliente -->
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('view') === '1') {
+      document.documentElement.classList.add('client-mode');
+    }
+  </script>
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Segoe UI', Arial, sans-serif; 
+      -webkit-tap-highlight-color: transparent;
+    }
     
-    body {
-      display: flex;
-      height: 100vh;
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
       background-color: #121212;
       color: #ffffff;
-      overflow: hidden;
+      position: fixed;
+      touch-action: none; /* Impede a página de rolar ou dar zoom nativo no celular */
+    }
+
+    body {
+      display: flex;
+    }
+
+    /* Oculta o menu lateral imediatamente no modo cliente */
+    html.client-mode #sidebar {
+      display: none !important;
     }
 
     #sidebar {
       width: 320px;
+      height: 100%;
       background-color: #1a1a1a;
       padding: 25px 20px;
       display: flex;
@@ -24,11 +52,7 @@
       gap: 20px;
       box-shadow: 2px 0 10px rgba(0,0,0,0.5);
       z-index: 10;
-    }
-
-    /* Oculta o menu lateral em modo de visualização do cliente */
-    body.client-mode #sidebar {
-      display: none !important;
+      overflow-y: auto;
     }
 
     h1 {
@@ -105,8 +129,10 @@
 
     #canvas-container {
       flex: 1;
+      width: 100%;
       height: 100%;
       cursor: grab;
+      touch-action: none;
     }
     
     #canvas-container:active {
@@ -145,13 +171,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
   <script>
-    // Verifica se a URL contém parâmetros para ativar o modo cliente
-    const urlParams = new URLSearchParams(window.location.search);
     const isClientMode = urlParams.get('view') === '1';
-
-    if (isClientMode) {
-      document.body.classList.add('client-mode');
-    }
 
     // 1. Cena, Câmera e Renderizador
     const container = document.getElementById('canvas-container');
@@ -163,15 +183,33 @@
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputEncoding = THREE.sRGBEncoding;
     container.appendChild(renderer.domElement);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.minDistance = 2.5;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 2.0;
     controls.maxDistance = 8;
-    controls.target.set(0, 0, 0);
+    controls.target.set(0, 0, 0); // Mantém o ponto de rotação 100% no centro da caneca
+    controls.enablePan = false;   // Impede que a caneca saia do centro ao arrastar no celular
+
+    // Ajusta o enquadramento perfeito da câmera conforme a proporção da tela (Mobile x Desktop)
+    function updateResponsiveCamera() {
+      const aspect = container.clientWidth / container.clientHeight;
+      camera.aspect = aspect;
+      
+      // Em telas na vertical (smartphones), aumenta o campo de visão para a caneca caber inteira
+      if (aspect < 1) {
+        camera.fov = 55;
+      } else {
+        camera.fov = 40;
+      }
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+    updateResponsiveCamera();
 
     // 2. Iluminação
     scene.add(new THREE.AmbientLight(0xffffff, 0.7));
@@ -195,7 +233,6 @@
     dynamicTexture.minFilter = THREE.LinearFilter;
     dynamicTexture.magFilter = THREE.LinearFilter;
     
-    // Melhora nitidez em ângulos inclinados se suportado pelo navegador
     const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
     if (maxAnisotropy) dynamicTexture.anisotropy = maxAnisotropy;
 
@@ -204,7 +241,6 @@
       ctx.fillStyle = bgColor;
       ctx.fillRect(0, 0, textureCanvas.width, textureCanvas.height);
 
-      // Margem de 10% de cada lado (onde fica a alça)
       const marginX = textureCanvas.width * 0.10; 
       const printWidth = textureCanvas.width - (marginX * 2);
       const printHeight = textureCanvas.height;
@@ -266,7 +302,7 @@
     const rimMesh = new THREE.Mesh(rimGeo, ceramicMaterial);
     mugGroup.add(rimMesh);
 
-    // D. Alça Curvada Completa
+    // D. Alça Curvada
     const handleCurve = new THREE.CubicBezierCurve3(
       new THREE.Vector3(radius - 0.05, height * 0.35, 0),
       new THREE.Vector3(radius + 0.95, height * 0.45, 0),
@@ -281,7 +317,7 @@
 
     scene.add(mugGroup);
 
-    // 6. Carregamento da Arte/Cor via URL (Leitura do link do cliente)
+    // 6. Carregamento da Arte/Cor via URL
     let currentImage = null;
 
     const paramColor = urlParams.get('color');
@@ -328,7 +364,7 @@
       updateTextureCanvas(currentImage, colorValue);
     });
 
-    // 8. Botão para Copiar o Link em Alta Definição (PNG sem perdas para a Nuvem)
+    // 8. Botão para Copiar o Link do Cliente
     const btnShare = document.getElementById('btn-share');
 
     btnShare.addEventListener('click', async function() {
@@ -340,7 +376,6 @@
         btnShare.innerText = '⏳ GERANDO LINK HD...';
 
         try {
-          // Renderiza a imagem limpa na resolução total original em PNG de alta qualidade
           const tempCanvas = document.createElement('canvas');
           tempCanvas.width = 2048;
           tempCanvas.height = 900;
@@ -351,7 +386,6 @@
           
           const base64Data = tempCanvas.toDataURL('image/png').split(',')[1];
 
-          // Upload em HD para a nuvem
           const formData = new FormData();
           formData.append('image', base64Data);
 
@@ -369,7 +403,6 @@
             throw new Error('Falha no upload');
           }
         } catch (err) {
-          // Fallback comprimido caso fique sem conexão
           const artBase64 = textureCanvas.toDataURL('image/jpeg', 0.8);
           shareUrl += `&art=${encodeURIComponent(artBase64)}`;
         } finally {
@@ -385,11 +418,7 @@
       });
     });
 
-    window.addEventListener('resize', () => {
-      camera.aspect = container.clientWidth / container.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
-    });
+    window.addEventListener('resize', updateResponsiveCamera);
 
     function animate() {
       requestAnimationFrame(animate);
